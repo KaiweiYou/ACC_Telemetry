@@ -2,9 +2,17 @@ from .shared_memory import accSharedMemory
 from dataclasses import dataclass
 from typing import Optional
 import time
+import logging
+
+# 配置日志
+logger = logging.getLogger(__name__)
 
 @dataclass
 class TelemetryData:
+    """遥测数据类
+
+    包含从ACC游戏中读取的所有遥测数据
+    """
     timestamp: float  # 数据时间戳
     
     # 基础数据
@@ -76,15 +84,32 @@ class TelemetryData:
     best_lap: int
 
 class ACCTelemetry:
+    """ACC遥测数据读取器
+
+    用于从ACC游戏的共享内存中读取实时遥测数据
+    """
+
     def __init__(self):
-        self.asm = accSharedMemory()
+        """初始化遥测数据读取器"""
+        try:
+            self.asm = accSharedMemory()
+        except Exception as e:
+            raise RuntimeError(f"无法初始化ACC共享内存连接: {e}")
         
     def get_telemetry(self) -> Optional[TelemetryData]:
-        """读取并返回遥测数据"""
-        sm = self.asm.read_shared_memory()
-        
-        if sm is not None:
-            return TelemetryData(
+        """读取并返回遥测数据
+
+        Returns:
+            Optional[TelemetryData]: 遥测数据对象，如果无数据则返回None
+
+        Raises:
+            RuntimeError: 当读取共享内存失败时
+        """
+        try:
+            sm = self.asm.read_shared_memory()
+
+            if sm is not None:
+                return TelemetryData(
                 timestamp=time.time(),
                 
                 # 基础数据
@@ -124,8 +149,8 @@ class ACCTelemetry:
                 
                 # 车辆动态
                 acceleration_x=sm.Physics.g_force.x,
-        acceleration_y=sm.Physics.g_force.y,
-        acceleration_z=sm.Physics.g_force.z,
+                acceleration_y=sm.Physics.g_force.y,
+                acceleration_z=sm.Physics.g_force.z,
                 
                 # 转向数据
                 steer_angle=sm.Physics.steer_angle,
@@ -146,7 +171,7 @@ class ACCTelemetry:
                 wheel_slip_rr=sm.Physics.wheel_slip.rear_right,
                 
                 # DRS和其他 (DRS在ACC中未使用，暂时设为0)
-        drs=0,
+                drs=0,
                 tc=sm.Physics.tc,
                 abs=sm.Physics.abs,
                 
@@ -155,10 +180,26 @@ class ACCTelemetry:
                 last_lap=sm.Graphics.last_time,
                 best_lap=sm.Graphics.best_time
             )
-        return None
+            return None
+        except Exception as e:
+            logger.error(f"读取遥测数据时发生错误: {e}")
+            raise RuntimeError(f"无法读取遥测数据: {e}")
 
-    def close(self):
-        self.asm.close()
+    def close(self) -> None:
+        """关闭共享内存连接"""
+        try:
+            self.asm.close()
+            logger.info("ACC遥测连接已关闭")
+        except Exception as e:
+            logger.error(f"关闭遥测连接时发生错误: {e}")
+
+    def __enter__(self):
+        """上下文管理器入口"""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """上下文管理器出口"""
+        self.close()
 
 def main():
     print("正在尝试连接 ACC 共享内存...")
