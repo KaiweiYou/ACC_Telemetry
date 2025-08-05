@@ -6,18 +6,74 @@ import time
 @dataclass
 class TelemetryData:
     timestamp: float  # 数据时间戳
+    
+    # 基础数据
     speed: float
     rpm: int
     gear: int
     fuel: float
+    
+    # 踏板数据
+    throttle: float  # 油门踏板位置 0-1
+    brake: float    # 刹车踏板位置 0-1
+    clutch: float   # 离合器踏板位置 0-1
+    
+    # 轮胎压力
     tire_pressure_fl: float
     tire_pressure_fr: float 
     tire_pressure_rl: float
     tire_pressure_rr: float
-    # 新增踏板数据
-    throttle: float  # 油门踏板位置 0-1
-    brake: float    # 刹车踏板位置 0-1
-    clutch: float   # 离合器踏板位置 0-1
+    
+    # 轮胎温度
+    tire_temp_fl: float
+    tire_temp_fr: float
+    tire_temp_rl: float
+    tire_temp_rr: float
+    
+    # 刹车温度
+    brake_temp_fl: float
+    brake_temp_fr: float
+    brake_temp_rl: float
+    brake_temp_rr: float
+    
+    # 悬挂数据
+    suspension_travel_fl: float
+    suspension_travel_fr: float
+    suspension_travel_rl: float
+    suspension_travel_rr: float
+    
+    # 车辆动态
+    acceleration_x: float  # 横向G力
+    acceleration_y: float  # 纵向G力
+    acceleration_z: float  # 垂直G力
+    
+    # 转向数据
+    steer_angle: float
+    
+    # 引擎数据
+    engine_temp: float
+    turbo_boost: float
+    
+    # 位置和速度
+    velocity_x: float
+    velocity_y: float
+    velocity_z: float
+    
+    # 车轮滑移
+    wheel_slip_fl: float
+    wheel_slip_fr: float
+    wheel_slip_rl: float
+    wheel_slip_rr: float
+    
+    # DRS和其他
+    drs: int  # DRS状态
+    tc: int   # 牵引力控制
+    abs: int  # ABS状态
+    
+    # 圈速数据
+    lap_time: int
+    last_lap: int
+    best_lap: int
 
 class ACCTelemetry:
     def __init__(self):
@@ -29,19 +85,75 @@ class ACCTelemetry:
         
         if sm is not None:
             return TelemetryData(
-                timestamp=time.time(),  # 添加当前时间戳
+                timestamp=time.time(),
+                
+                # 基础数据
                 speed=sm.Physics.speed_kmh,
                 rpm=sm.Physics.rpm,
                 gear=sm.Physics.gear,
                 fuel=sm.Physics.fuel,
+                
+                # 踏板数据
+                throttle=sm.Physics.gas,
+                brake=sm.Physics.brake,
+                clutch=sm.Physics.clutch,
+                
+                # 轮胎压力
                 tire_pressure_fl=sm.Physics.wheel_pressure.front_left,
                 tire_pressure_fr=sm.Physics.wheel_pressure.front_right,
                 tire_pressure_rl=sm.Physics.wheel_pressure.rear_left,
                 tire_pressure_rr=sm.Physics.wheel_pressure.rear_right,
-                # 新增踏板数据读取
-                throttle=sm.Physics.gas,
-                brake=sm.Physics.brake,
-                clutch=sm.Physics.clutch
+                
+                # 轮胎温度
+                tire_temp_fl=sm.Physics.tyre_core_temp.front_left,
+                tire_temp_fr=sm.Physics.tyre_core_temp.front_right,
+                tire_temp_rl=sm.Physics.tyre_core_temp.rear_left,
+                tire_temp_rr=sm.Physics.tyre_core_temp.rear_right,
+                
+                # 刹车温度
+                brake_temp_fl=sm.Physics.brake_temp.front_left,
+                brake_temp_fr=sm.Physics.brake_temp.front_right,
+                brake_temp_rl=sm.Physics.brake_temp.rear_left,
+                brake_temp_rr=sm.Physics.brake_temp.rear_right,
+                
+                # 悬挂数据
+                suspension_travel_fl=sm.Physics.suspension_travel.front_left,
+                suspension_travel_fr=sm.Physics.suspension_travel.front_right,
+                suspension_travel_rl=sm.Physics.suspension_travel.rear_left,
+                suspension_travel_rr=sm.Physics.suspension_travel.rear_right,
+                
+                # 车辆动态
+                acceleration_x=sm.Physics.g_force.x,
+        acceleration_y=sm.Physics.g_force.y,
+        acceleration_z=sm.Physics.g_force.z,
+                
+                # 转向数据
+                steer_angle=sm.Physics.steer_angle,
+                
+                # 引擎数据
+                engine_temp=sm.Physics.water_temp,
+                turbo_boost=sm.Physics.turbo_boost,
+                
+                # 位置和速度
+                velocity_x=sm.Physics.velocity.x,
+                velocity_y=sm.Physics.velocity.y,
+                velocity_z=sm.Physics.velocity.z,
+                
+                # 车轮滑移
+                wheel_slip_fl=sm.Physics.wheel_slip.front_left,
+                wheel_slip_fr=sm.Physics.wheel_slip.front_right,
+                wheel_slip_rl=sm.Physics.wheel_slip.rear_left,
+                wheel_slip_rr=sm.Physics.wheel_slip.rear_right,
+                
+                # DRS和其他 (DRS在ACC中未使用，暂时设为0)
+        drs=0,
+                tc=sm.Physics.tc,
+                abs=sm.Physics.abs,
+                
+                # 圈速数据
+                lap_time=sm.Graphics.current_time,
+                last_lap=sm.Graphics.last_time,
+                best_lap=sm.Graphics.best_time
             )
         return None
 
