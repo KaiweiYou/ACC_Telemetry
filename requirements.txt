@@ -1,0 +1,14 @@
+# ACC_Telemetry 项目依赖包
+
+# 基础依赖
+python-osc>=1.8.0  # OSC通信
+typing>=3.7.4      # 类型注解支持
+dataclasses>=0.8   # 数据类支持
+
+# GUI依赖
+# tkinter通常随Python安装，不需要单独安装
+
+# 可选依赖
+# 如果需要更高级的图形界面，可以取消下面的注释
+# matplotlib>=3.5.0  # 用于绘制图表
+# numpy>=1.21.0      # 用于数据处理

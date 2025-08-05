@@ -1,0 +1,106 @@
+# Python字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C扩展
+*.so
+
+# 分发/打包
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# 安装程序日志
+pip-log.txt
+pip-delete-this-directory.txt
+
+# 单元测试/覆盖率报告
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 环境
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder项目设置
+.spyderproject
+.spyproject
+
+# Rope项目设置
+.ropeproject
+
+# mkdocs文档
+/site
+
+# mypy
+.mypy_cache/
+
+# IDE文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 项目特定文件
+*.log
+*.csv
+*.json
+*.db
+
+# 图像文件（除了SVG）
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+
+# 排除示例生成的文件
+examples/*.png
+examples/*.csv
+examples/*.json
+
+# 保留示例目录中的所有Python文件和README
+!examples/*.py
+!examples/README.md
+!examples/arduino_integration_example/*.py
+!examples/arduino_integration_example/*.ino
+
+# 保留图标文件
+!icon.svg

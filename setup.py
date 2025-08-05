@@ -1,17 +1,26 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="pyaccsharedmemory",
+    name="acc_telemetry",
     version="1.0.0",
     author="Ryan Rennoir",
     author_email="ryanrennoir9@gmail.com",
     url="https://github.com/rrennoir/PyAccSharedMemory",
-    description="ACC shared memory reader in python",
-    py_modules=["pyaccsharedmemory"],
-    package_dir={"": "src"},
+    description="Assetto Corsa Competizione telemetry data reader and visualization tool",
+    packages=find_packages(),
+    install_requires=[
+        "python-osc>=1.8.0",
+        "typing>=3.7.4",
+        "dataclasses>=0.8",
+    ],
+    entry_points={
+        "console_scripts": [
+            "acc-telemetry=main:main",
+        ],
+    },
     classifiers=[
         "Operating System :: Microsoft",
         "Programming Language :: Python :: 3",
