@@ -89,7 +89,8 @@ class App(ctk.CTk):
         menu_buttons_data = [
             {"id": "dashboard", "text": "📊 实时仪表盘"},
             {"id": "telemetry", "text": "🔧 遥测配置"},
-            {"id": "osc", "text": "🌐 OSC 数据流"}
+            {"id": "web", "text": "🌐 Web 遥测面板"},
+            {"id": "osc", "text": "📡 OSC 数据流"}
         ]
 
         self.menu_buttons = {}
@@ -121,6 +122,8 @@ class App(ctk.CTk):
             self.create_dashboard_content(self.content_area)
         elif new_tab == 'telemetry':
             self.create_telemetry_content(self.content_area)
+        elif new_tab == 'web':
+            self.create_web_content(self.content_area)
         elif new_tab == 'osc':
             self.create_osc_content(self.content_area)
         
@@ -146,6 +149,216 @@ class App(ctk.CTk):
         from acc_telemetry.ui.telemetry_settings import TelemetrySettings
         settings_frame = TelemetrySettings(parent, self)
         settings_frame.pack(fill="both", expand=True)
+    
+    def create_web_content(self, parent):
+        """创建Web遥测面板内容页面"""
+        import socket
+        import threading
+        
+        # Web服务器进程跟踪
+        self.web_server = None
+        self.web_server_thread = None
+        
+        # 标题
+        title = ctk.CTkLabel(
+            parent,
+            text="🌐 Web 遥测面板",
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
+        title.pack(pady=(30, 10))
+        
+        # 描述
+        desc = ctk.CTkLabel(
+            parent,
+            text="启动Web服务器，通过浏览器访问实时遥测数据\n支持手机、平板等移动设备访问",
+            font=ctk.CTkFont(size=14),
+            text_color=("gray70", "gray30")
+        )
+        desc.pack(pady=(0, 20))
+        
+        # Web服务器配置表单
+        form_frame = ctk.CTkFrame(parent, corner_radius=15)
+        form_frame.pack(fill="x", padx=40, pady=20)
+        
+        # 端口配置
+        port_label = ctk.CTkLabel(
+            form_frame,
+            text="🔌 服务器端口",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        port_label.pack(anchor="w", padx=20, pady=(20, 5))
+        
+        port_var = ctk.StringVar(value="8080")
+        port_entry = ctk.CTkEntry(
+            form_frame,
+            textvariable=port_var,
+            placeholder_text="例如: 8080",
+            height=40,
+            font=ctk.CTkFont(size=14)
+        )
+        port_entry.pack(fill="x", padx=20, pady=(0, 15))
+        
+        # 获取本机IP地址
+        def get_local_ip():
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.connect(("8.8.8.8", 80))
+                ip = s.getsockname()[0]
+                s.close()
+                return ip
+            except Exception:
+                return "127.0.0.1"
+        
+        local_ip = get_local_ip()
+        
+        # 访问地址显示
+        access_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
+        access_frame.pack(fill="x", padx=20, pady=(0, 20))
+        
+        access_label = ctk.CTkLabel(
+            access_frame,
+            text="📱 访问地址",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        access_label.pack(anchor="w", pady=(0, 10))
+        
+        local_access = ctk.CTkLabel(
+            access_frame,
+            text=f"本机访问: http://localhost:{port_var.get()}",
+            font=ctk.CTkFont(size=14),
+            text_color=("#4CAF50", "#4CAF50")
+        )
+        local_access.pack(anchor="w", pady=2)
+        
+        network_access = ctk.CTkLabel(
+            access_frame,
+            text=f"局域网访问: http://{local_ip}:{port_var.get()}",
+            font=ctk.CTkFont(size=14),
+            text_color=("#2196F3", "#2196F3")
+        )
+        network_access.pack(anchor="w", pady=2)
+        
+        # 更新访问地址的函数
+        def update_access_urls(*args):
+            port = port_var.get()
+            local_access.configure(text=f"本机访问: http://localhost:{port}")
+            network_access.configure(text=f"局域网访问: http://{local_ip}:{port}")
+        
+        port_var.trace("w", update_access_urls)
+        
+        # 状态显示
+        status_frame = ctk.CTkFrame(parent, corner_radius=15)
+        status_frame.pack(fill="x", padx=40, pady=(0, 20))
+        
+        status_label = ctk.CTkLabel(
+            status_frame,
+            text="🔴 服务器未启动",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        status_label.pack(pady=20)
+        
+        # 控制按钮
+        button_frame = ctk.CTkFrame(parent, fg_color="transparent")
+        button_frame.pack(fill="x", padx=40, pady=20)
+        
+        def start_web_server():
+            try:
+                port = int(port_var.get())
+                
+                from acc_telemetry.web import WebTelemetryServer
+                self.web_server = WebTelemetryServer(host='0.0.0.0', port=port)
+                
+                def run_server():
+                    try:
+                        self.web_server.start()
+                    except Exception as e:
+                        self.after(0, lambda: self.show_error_dialog(f"Web服务器启动失败: {e}"))
+                        self.after(0, lambda: status_label.configure(text="🔴 服务器启动失败"))
+                
+                self.web_server_thread = threading.Thread(target=run_server)
+                self.web_server_thread.daemon = True
+                self.web_server_thread.start()
+                
+                status_label.configure(text="🟢 服务器运行中")
+                start_btn.configure(state="disabled")
+                stop_btn.configure(state="normal")
+                
+            except ValueError:
+                self.show_error_dialog("请输入有效的端口号")
+            except Exception as e:
+                self.show_error_dialog(f"启动失败: {e}")
+        
+        def stop_web_server():
+            try:
+                if self.web_server:
+                    self.web_server.stop()
+                    self.web_server = None
+                
+                status_label.configure(text="🔴 服务器已停止")
+                start_btn.configure(state="normal")
+                stop_btn.configure(state="disabled")
+                
+            except Exception as e:
+                self.show_error_dialog(f"停止失败: {e}")
+        
+        def open_browser():
+            import webbrowser
+            port = port_var.get()
+            webbrowser.open(f"http://localhost:{port}")
+        
+        start_btn = ctk.CTkButton(
+            button_frame,
+            text="🚀 启动服务器",
+            command=start_web_server,
+            font=ctk.CTkFont(size=16, weight="bold"),
+            height=45,
+            fg_color="#4CAF50",
+            hover_color="#45a049"
+        )
+        start_btn.pack(side="left", padx=(0, 10), fill="x", expand=True)
+        
+        stop_btn = ctk.CTkButton(
+            button_frame,
+            text="🛑 停止服务器",
+            command=stop_web_server,
+            font=ctk.CTkFont(size=16, weight="bold"),
+            height=45,
+            state="disabled",
+            fg_color="#f44336",
+            hover_color="#da190b"
+        )
+        stop_btn.pack(side="left", padx=(10, 10), fill="x", expand=True)
+        
+        open_btn = ctk.CTkButton(
+            button_frame,
+            text="🌐 打开浏览器",
+            command=open_browser,
+            font=ctk.CTkFont(size=16, weight="bold"),
+            height=45,
+            fg_color="#2196F3",
+            hover_color="#1976D2"
+        )
+        open_btn.pack(side="left", padx=(10, 0), fill="x", expand=True)
+        
+        # 使用说明
+        info_frame = ctk.CTkFrame(parent, corner_radius=15)
+        info_frame.pack(fill="x", padx=40, pady=(0, 20))
+        
+        info_title = ctk.CTkLabel(
+            info_frame,
+            text="📋 使用说明",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        info_title.pack(anchor="w", padx=20, pady=(20, 10))
+        
+        info_text = ctk.CTkLabel(
+            info_frame,
+            text="1. 确保ACC游戏正在运行\n2. 点击'启动服务器'按钮\n3. 在浏览器中访问显示的地址\n4. 手机访问请使用局域网地址\n5. 确保防火墙允许端口访问",
+            font=ctk.CTkFont(size=14),
+            text_color=("gray70", "gray30"),
+            justify="left"
+        )
+        info_text.pack(anchor="w", padx=20, pady=(0, 20))
     
     def create_osc_content(self, parent):
         """创建OSC配置内容页面"""

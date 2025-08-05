@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACC 遥测仪表盘</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .connection-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.connected {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .category-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #FFD700;
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 8px;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .data-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .data-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .data-label {
+            font-size: 0.85em;
+            color: #B0C4DE;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .data-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .data-value.warning {
+            color: #FFA500;
+        }
+
+        .data-value.danger {
+            color: #FF6B6B;
+        }
+
+        .data-value.good {
+            color: #4ECDC4;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2em;
+            color: #B0C4DE;
+            margin-top: 50px;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #B0C4DE;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .data-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+        }
+
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="refresh-indicator" id="refreshIndicator"></div>
+    
+    <div class="header">
+        <h1>🏎️ ACC 遥测仪表盘</h1>
+        <div class="connection-status disconnected" id="connectionStatus">连接中...</div>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer">
+        <div class="loading">正在加载遥测数据...</div>
+    </div>
+
+    <script>
+        class TelemetryDashboard {
+            constructor() {
+                this.socket = io();
+                this.config = null;
+                this.categories = {};
+                this.setupSocketEvents();
+                this.loadConfig();
+            }
+
+            setupSocketEvents() {
+                this.socket.on('connect', () => {
+                    console.log('已连接到服务器');
+                    this.updateConnectionStatus(true);
+                });
+
+                this.socket.on('disconnect', () => {
+                    console.log('与服务器断开连接');
+                    this.updateConnectionStatus(false);
+                });
+
+                this.socket.on('telemetry_update', (data) => {
+                    this.updateTelemetryData(data);
+                    this.flashRefreshIndicator();
+                });
+            }
+
+            updateConnectionStatus(connected) {
+                const statusElement = document.getElementById('connectionStatus');
+                if (connected) {
+                    statusElement.textContent = '已连接';
+                    statusElement.className = 'connection-status connected';
+                } else {
+                    statusElement.textContent = '连接断开';
+                    statusElement.className = 'connection-status disconnected';
+                }
+            }
+
+            flashRefreshIndicator() {
+                const indicator = document.getElementById('refreshIndicator');
+                indicator.style.backgroundColor = '#FFD700';
+                setTimeout(() => {
+                    indicator.style.backgroundColor = '#4CAF50';
+                }, 100);
+            }
+
+            async loadConfig() {
+                try {
+                    const response = await fetch('/api/config');
+                    this.config = await response.json();
+                    this.createDashboard();
+                } catch (error) {
+                    console.error('加载配置失败:', error);
+                }
+            }
+
+            createDashboard() {
+                const container = document.getElementById('dashboardContainer');
+                container.innerHTML = '';
+
+                // 按类别组织数据
+                this.categories = {};
+                for (const [field, config] of Object.entries(this.config.data_config)) {
+                    if (this.config.display_settings[field]) {
+                        const category = config.category;
+                        if (!this.categories[category]) {
+                            this.categories[category] = [];
+                        }
+                        this.categories[category].push({ field, config });
+                    }
+                }
+
+                // 创建各类别的显示区域
+                for (const [category, items] of Object.entries(this.categories)) {
+                    const section = this.createCategorySection(category, items);
+                    container.appendChild(section);
+                }
+            }
+
+            createCategorySection(category, items) {
+                const section = document.createElement('div');
+                section.className = 'category-section';
+
+                const title = document.createElement('div');
+                title.className = 'category-title';
+                title.textContent = category;
+                section.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'data-grid';
+
+                items.forEach(({ field, config }) => {
+                    const item = this.createDataItem(field, config);
+                    grid.appendChild(item);
+                });
+
+                section.appendChild(grid);
+                return section;
+            }
+
+            createDataItem(field, config) {
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                item.id = `data-${field}`;
+
+                const label = document.createElement('div');
+                label.className = 'data-label';
+                label.textContent = config.label;
+                item.appendChild(label);
+
+                const value = document.createElement('div');
+                value.className = 'data-value';
+                value.id = `value-${field}`;
+                value.textContent = '--';
+                item.appendChild(value);
+
+                return item;
+            }
+
+            updateTelemetryData(data) {
+                for (const [field, value] of Object.entries(data)) {
+                    const valueElement = document.getElementById(`value-${field}`);
+                    if (valueElement) {
+                        valueElement.textContent = value;
+                        
+                        // 根据数据类型添加样式
+                        valueElement.className = 'data-value';
+                        
+                        // 添加数值状态颜色
+                        if (field.includes('temp') && parseFloat(value) > 100) {
+                            valueElement.classList.add('warning');
+                        } else if (field.includes('temp') && parseFloat(value) > 120) {
+                            valueElement.classList.add('danger');
+                        } else if (field === 'fuel' && parseFloat(value) < 10) {
+                            valueElement.classList.add('warning');
+                        } else if (field === 'fuel' && parseFloat(value) < 5) {
+                            valueElement.classList.add('danger');
+                        } else if (field.includes('pressure') && parseFloat(value) > 25) {
+                            valueElement.classList.add('good');
+                        }
+                    }
+                }
+            }
+        }
+
+        // 初始化仪表盘
+        document.addEventListener('DOMContentLoaded', () => {
+            new TelemetryDashboard();
+        });
+    </script>
+</body>
+</html>

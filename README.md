@@ -8,7 +8,8 @@
 
 - **数据读取**：通过共享内存读取ACC游戏的实时遥测数据
 - **终端显示**：在命令行终端中实时显示遥测数据
-- **图形界面**：提供基于Tkinter的图形化仪表盘
+- **图形界面**：提供基于CustomTkinter的现代化图形仪表盘
+- **Web遥测面板**：🌐 通过Web浏览器访问实时遥测数据，支持手机、平板等移动设备
 - **OSC传输**：支持通过OSC协议将数据发送到其他应用程序或设备
 
 ## 安装方法
@@ -81,6 +82,32 @@ python dashboard.py
 ```bash
 python -m acc_telemetry.ui.dashboard
 ```
+
+#### Web遥测面板
+
+启动Web服务器，通过浏览器访问实时遥测数据：
+
+```bash
+python web_telemetry_server.py
+```
+
+或者运行示例：
+
+```bash
+python examples/web_telemetry_example.py
+```
+
+**功能特点：**
+- 🌐 支持局域网内任何设备访问
+- 📱 完美支持手机、平板等移动设备
+- 🎨 现代化响应式界面设计
+- ⚡ 实时数据更新（60fps）
+- 🔧 可配置显示项目
+
+**访问方式：**
+- 本机访问：`http://localhost:8080`
+- 局域网访问：`http://[您的IP地址]:8080`
+- 手机访问：在同一WiFi下，浏览器输入局域网地址
 
 #### OSC数据发送
 
