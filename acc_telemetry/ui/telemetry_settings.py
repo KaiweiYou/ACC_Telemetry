@@ -30,7 +30,7 @@ class TelemetrySettings(ctk.CTkFrame):
                 "throttle": {"name": "油门踏板 (%)", "default": True},
                 "brake": {"name": "刹车踏板 (%)", "default": True},
                 "clutch": {"name": "离合器踏板 (%)", "default": True},
-                "steering_angle": {"name": "方向盘角度 (°)", "default": False},
+                "steer_angle": {"name": "方向盘角度 (°)", "default": False},
             },
             
             # 轮胎数据
@@ -313,7 +313,7 @@ class TelemetrySettings(ctk.CTkFrame):
         """应用专业模式预设"""
         professional_items = [
             "speed", "rpm", "gear", "fuel",
-            "throttle", "brake", "clutch", "steering_angle",
+            "throttle", "brake", "clutch", "steer_angle",
             "tire_pressure_fl", "tire_pressure_fr", 
             "tire_pressure_rl", "tire_pressure_rr",
             "tire_temp_fl", "tire_temp_fr", 

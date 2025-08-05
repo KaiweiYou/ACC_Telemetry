@@ -6,7 +6,7 @@
   "throttle": true,
   "brake": true,
   "clutch": true,
-  "steering_angle": false,
+  "steer_angle": true,
   "tire_pressure_fl": true,
   "tire_pressure_fr": true,
   "tire_pressure_rl": true,
