@@ -16,7 +16,7 @@ ACC_Telemetry OSC接收器示例
 
 import argparse
 import time
-from pythonosc import dispatcher
+from pythonosc import dispatcher as osc_dispatcher
 from pythonosc import osc_server
 
 # 存储最新的遥测数据
@@ -138,26 +138,26 @@ def main():
     args = parser.parse_args()
 
     # 设置OSC调度器
-    dispatcher = dispatcher.Dispatcher()
+    disp = osc_dispatcher.Dispatcher()
     
     # 注册回调函数
-    dispatcher.map("/acc/all", handle_all)
-    dispatcher.map("/acc/speed", handle_speed)
-    dispatcher.map("/acc/rpm", handle_rpm)
-    dispatcher.map("/acc/gear", handle_gear)
-    dispatcher.map("/acc/fuel", handle_fuel)
-    dispatcher.map("/acc/pedals/throttle", handle_throttle)
-    dispatcher.map("/acc/pedals/brake", handle_brake)
-    dispatcher.map("/acc/pedals/clutch", handle_clutch)
-    dispatcher.map("/acc/tires/fl", handle_tire_fl)
-    dispatcher.map("/acc/tires/fr", handle_tire_fr)
-    dispatcher.map("/acc/tires/rl", handle_tire_rl)
-    dispatcher.map("/acc/tires/rr", handle_tire_rr)
-    dispatcher.map("/acc/timestamp", handle_timestamp)
+    disp.map("/acc/all", handle_all)
+    disp.map("/acc/speed", handle_speed)
+    disp.map("/acc/rpm", handle_rpm)
+    disp.map("/acc/gear", handle_gear)
+    disp.map("/acc/fuel", handle_fuel)
+    disp.map("/acc/pedals/throttle", handle_throttle)
+    disp.map("/acc/pedals/brake", handle_brake)
+    disp.map("/acc/pedals/clutch", handle_clutch)
+    disp.map("/acc/tires/fl", handle_tire_fl)
+    disp.map("/acc/tires/fr", handle_tire_fr)
+    disp.map("/acc/tires/rl", handle_tire_rl)
+    disp.map("/acc/tires/rr", handle_tire_rr)
+    disp.map("/acc/timestamp", handle_timestamp)
 
     # 启动OSC服务器
     server = osc_server.ThreadingOSCUDPServer(
-        (args.ip, args.port), dispatcher)
+        (args.ip, args.port), disp)
     
     print(f"启动OSC接收器，监听 {args.ip}:{args.port}")
     print("等待接收数据...")
