@@ -5,14 +5,7 @@ ACC Telemetry 主程序
 提供现代化GUI界面，用户可以选择不同的功能模式
 """
 
-try:
-    import customtkinter as ctk
-except ImportError:
-    print("正在安装 CustomTkinter...")
-    import subprocess
-    import sys
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "customtkinter"])
-    import customtkinter as ctk
+import customtkinter as ctk
 
 import subprocess
 import sys

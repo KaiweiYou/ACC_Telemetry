@@ -1,2 +1,4 @@
 # ACC Telemetry 项目依赖
+customtkinter>=5.2.0
 python-osc>=1.8.0
+Pillow>=9.0.0
