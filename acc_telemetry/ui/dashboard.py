@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from telemetry import ACCTelemetry
+from ..core.telemetry import ACCTelemetry
 
 class AccDashboard:
     def __init__(self):

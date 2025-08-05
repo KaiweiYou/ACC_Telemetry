@@ -1,0 +1,2 @@
+# ACC Telemetry 项目依赖
+python-osc>=1.8.0

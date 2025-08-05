@@ -1,4 +1,4 @@
-from pyaccsharedmemory import accSharedMemory
+from .shared_memory import accSharedMemory
 from dataclasses import dataclass
 from typing import Optional
 import time

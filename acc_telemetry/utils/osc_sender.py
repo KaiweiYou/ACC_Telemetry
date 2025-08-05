@@ -1,5 +1,5 @@
 from pythonosc.udp_client import SimpleUDPClient
-from telemetry import ACCTelemetry
+from ..core.telemetry import ACCTelemetry
 import time
 
 class ACCDataSender:
