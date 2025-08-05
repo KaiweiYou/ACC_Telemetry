@@ -5,6 +5,7 @@ import time
 
 @dataclass
 class TelemetryData:
+    timestamp: float  # 数据时间戳
     speed: float
     rpm: int
     gear: int
@@ -28,6 +29,7 @@ class ACCTelemetry:
         
         if sm is not None:
             return TelemetryData(
+                timestamp=time.time(),  # 添加当前时间戳
                 speed=sm.Physics.speed_kmh,
                 rpm=sm.Physics.rpm,
                 gear=sm.Physics.gear,
