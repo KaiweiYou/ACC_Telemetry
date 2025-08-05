@@ -17,6 +17,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from collections import deque
++from matplotlib import font_manager
++
++
++# 自动检测并设置支持中文的字体，避免缺字警告
++def _set_chinese_font():
++    """在常见中文字体中选择可用字体并应用到 matplotlib。"""
++    candidate_fonts = [
++        "SimHei",          # 黑体
++        "Microsoft YaHei", # 微软雅黑
++        "SimSun",          # 宋体
++        "STHeiti",         # 华文黑体 (macOS)
++        "PingFang SC"      # 苹果系统默认中文字体
++    ]
++    available = {f.name for f in font_manager.fontManager.ttflist}
++    for font_name in candidate_fonts:
++        if font_name in available:
++            plt.rcParams["font.family"] = font_name
++            break
++    # 解决负号无法正常显示的问题
++    plt.rcParams["axes.unicode_minus"] = False
++
++
++# 调用字体设置
++_set_chinese_font()
 
 # 导入遥测模块
 from acc_telemetry.core.telemetry import ACCTelemetry
