@@ -9,12 +9,17 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 setup(
     name="acc-telemetry",
     version="1.0.0",
-    author="ACC Telemetry Team",
-    author_email="",
-    url="",
-    description="ACC Telemetry Data Tool with GUI",
+    author="Ryan Rennoir",
+    author_email="ryanrennoir9@gmail.com",
+    url="https://github.com/rrennoir/PyAccSharedMemory",
+    description="Assetto Corsa Competizione telemetry data reader and visualization tool with GUI",
     packages=find_packages(),
     install_requires=requirements,
+    entry_points={
+        "console_scripts": [
+            "acc-telemetry=main:main",
+        ],
+    },
     classifiers=[
         "Operating System :: Microsoft :: Windows",
         "Programming Language :: Python :: 3",
@@ -26,10 +31,5 @@ setup(
         "License :: OSI Approved :: MIT License"],
     long_description=long_description,
     long_description_content_type="text/markdown",
-    python_requires=">=3.8",
-    entry_points={
-        "console_scripts": [
-            "acc-telemetry=main:main",
-        ],
-    },
+    python_requires=">=3.8"
 )
