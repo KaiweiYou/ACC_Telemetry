@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ACC 遥测 Web 面板服务器启动脚本
+ACC遥测音乐系统启动脚本
 
-这个脚本是一个便捷的启动器，实际功能在 acc_telemetry.web.web_telemetry_server 模块中实现。
+这个脚本是一个便捷的启动器，实际功能在 acc_telemetry.audio.start_music_system 模块中实现。
 """
 
 import sys
@@ -14,5 +14,5 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 if __name__ == '__main__':
-    from acc_telemetry.web.web_telemetry_server import main
+    from acc_telemetry.audio.start_music_system import main
     main()

@@ -31,7 +31,7 @@ class WebTelemetryServer:
         
     def load_display_settings(self):
         """加载显示设置"""
-        settings_file = "telemetry_display_settings.json"
+        settings_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "telemetry_display_settings.json")
         try:
             if os.path.exists(settings_file):
                 with open(settings_file, 'r', encoding='utf-8') as f:

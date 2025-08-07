@@ -125,45 +125,73 @@ python -m acc_telemetry.utils.osc_sender
 
 ## 配置说明
 
-可以通过修改`config.py`文件来自定义程序的行为：
+可以通过修改`acc_telemetry/config/config.py`文件来自定义程序的行为：
 
 - OSC发送目标IP和端口
 - 数据更新频率
 - 界面显示选项
+- 遥测数据显示设置存储在`acc_telemetry/config/telemetry_display_settings.json`中
 
 ## 项目结构
 
 ```
 ├── README.md                 # 项目说明文档
 ├── requirements.txt          # 项目依赖包列表
-├── config.py                 # 配置文件
 ├── main.py                   # 主程序入口
-├── telemetry.py              # 遥测数据读取和终端显示（兼容旧版本）
-├── dashboard.py              # 图形界面仪表盘（兼容旧版本）
-├── osc_sender.py             # OSC数据发送（兼容旧版本）
+├── web_telemetry_server.py   # Web遥测服务器启动脚本
+├── start_music_system.py     # 音乐系统启动脚本
 ├── setup.py                  # 安装配置文件
 ├── acc_telemetry/            # 核心包
 │   ├── __init__.py
+│   ├── audio/                # 音频/音乐系统模块
+│   │   ├── __init__.py
+│   │   ├── music_gui.py      # 音乐系统GUI界面
+│   │   ├── music_integration.py # 音乐集成核心
+│   │   ├── supercollider_engine.py # SuperCollider引擎
+│   │   └── start_music_system.py # 音乐系统启动器
+│   ├── config/               # 配置文件模块
+│   │   ├── __init__.py
+│   │   ├── config.py         # 主配置文件
+│   │   └── telemetry_display_settings.json # 显示设置
 │   ├── core/                 # 核心功能模块
 │   │   ├── __init__.py
+│   │   ├── shared_memory.py  # 共享内存读取
 │   │   └── telemetry.py      # 遥测数据读取和处理
 │   ├── ui/                   # 用户界面模块
 │   │   ├── __init__.py
-│   │   └── dashboard.py      # 图形化仪表盘
-│   └── utils/                # 工具函数模块
+│   │   ├── dashboard.py      # 图形化仪表盘
+│   │   ├── main_window.py    # 主窗口
+│   │   └── telemetry_settings.py # 遥测设置界面
+│   ├── utils/                # 工具函数模块
+│   │   ├── __init__.py
+│   │   └── osc_sender.py     # OSC数据发送
+│   └── web/                  # Web界面模块
 │       ├── __init__.py
-│       └── osc_sender.py     # OSC数据发送
-├── tests/                    # 测试目录
-│   └── __init__.py
-└── examples/                 # 示例代码
-    ├── README.md
-    ├── data_logger_example.py
-    ├── data_analysis_example.py
-    ├── data_visualization_example.py
-    ├── osc_receiver_example.py
-    └── arduino_integration_example/
-        ├── arduino_serial_bridge.py
-        └── acc_telemetry_display.ino
+│       ├── templates/        # Web模板
+│       ├── web_server.py     # Web服务器核心
+│       └── web_telemetry_server.py # Web服务器启动器
+├── docs/                     # 文档目录
+│   ├── ACCSharedMemoryDocumentationV1.8.12.pdf
+│   └── icon.svg
+├── examples/                 # 示例代码
+│   ├── README.md
+│   ├── arduino_integration_example/
+│   ├── data_analysis_example.py
+│   ├── data_logger_example.py
+│   ├── data_visualization_example.py
+│   ├── improved_usage_example.py
+│   ├── osc_receiver_example.py
+│   └── web_telemetry_example.py
+├── scripts/                  # 脚本目录
+│   ├── __init__.py
+│   ├── install.py
+│   └── quality_check.py
+├── supercollider/            # SuperCollider音频引擎
+│   └── acc_music_engine.scd
+└── tests/                    # 测试目录
+    ├── __init__.py
+    ├── test_improved.py
+    └── test_telemetry.py
 ```
 
 ## 参考资料

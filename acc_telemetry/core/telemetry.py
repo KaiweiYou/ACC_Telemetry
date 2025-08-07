@@ -91,10 +91,52 @@ class ACCTelemetry:
 
     def __init__(self):
         """初始化遥测数据读取器"""
+        self.asm = None
+        self._connected = False
+        
+    def connect(self) -> bool:
+        """连接到ACC共享内存
+        
+        Returns:
+            bool: 连接是否成功
+        """
         try:
             self.asm = accSharedMemory()
+            self._connected = True
+            logger.info("已连接到ACC共享内存")
+            return True
         except Exception as e:
-            raise RuntimeError(f"无法初始化ACC共享内存连接: {e}")
+            logger.error(f"无法连接到ACC共享内存: {e}")
+            self._connected = False
+            return False
+            
+    def disconnect(self) -> None:
+        """断开共享内存连接"""
+        try:
+            if self.asm:
+                self.asm.close()
+            self._connected = False
+            logger.info("已断开ACC共享内存连接")
+        except Exception as e:
+            logger.error(f"断开连接时发生错误: {e}")
+            
+    def is_connected(self) -> bool:
+        """检查是否已连接到共享内存
+        
+        Returns:
+            bool: 连接状态
+        """
+        return self._connected and self.asm is not None
+        
+    def read_data(self) -> Optional[TelemetryData]:
+        """读取遥测数据
+        
+        Returns:
+            Optional[TelemetryData]: 遥测数据对象，如果无数据则返回None
+        """
+        if not self.is_connected():
+            return None
+        return self.get_telemetry()
         
     def get_telemetry(self) -> Optional[TelemetryData]:
         """读取并返回遥测数据
@@ -105,82 +147,86 @@ class ACCTelemetry:
         Raises:
             RuntimeError: 当读取共享内存失败时
         """
+        if not self.is_connected():
+            return None
+            
         try:
             sm = self.asm.read_shared_memory()
 
             if sm is not None:
                 return TelemetryData(
-                timestamp=time.time(),
-                
-                # 基础数据
-                speed=sm.Physics.speed_kmh,
-                rpm=sm.Physics.rpm,
-                gear=sm.Physics.gear,
-                fuel=sm.Physics.fuel,
-                
-                # 踏板数据
-                throttle=sm.Physics.gas,
-                brake=sm.Physics.brake,
-                clutch=sm.Physics.clutch,
-                
-                # 轮胎压力
-                tire_pressure_fl=sm.Physics.wheel_pressure.front_left,
-                tire_pressure_fr=sm.Physics.wheel_pressure.front_right,
-                tire_pressure_rl=sm.Physics.wheel_pressure.rear_left,
-                tire_pressure_rr=sm.Physics.wheel_pressure.rear_right,
-                
-                # 轮胎温度
-                tire_temp_fl=sm.Physics.tyre_core_temp.front_left,
-                tire_temp_fr=sm.Physics.tyre_core_temp.front_right,
-                tire_temp_rl=sm.Physics.tyre_core_temp.rear_left,
-                tire_temp_rr=sm.Physics.tyre_core_temp.rear_right,
-                
-                # 刹车温度
-                brake_temp_fl=sm.Physics.brake_temp.front_left,
-                brake_temp_fr=sm.Physics.brake_temp.front_right,
-                brake_temp_rl=sm.Physics.brake_temp.rear_left,
-                brake_temp_rr=sm.Physics.brake_temp.rear_right,
-                
-                # 悬挂数据
-                suspension_travel_fl=sm.Physics.suspension_travel.front_left,
-                suspension_travel_fr=sm.Physics.suspension_travel.front_right,
-                suspension_travel_rl=sm.Physics.suspension_travel.rear_left,
-                suspension_travel_rr=sm.Physics.suspension_travel.rear_right,
-                
-                # 车辆动态
-                acceleration_x=sm.Physics.g_force.x,
-                acceleration_y=sm.Physics.g_force.y,
-                acceleration_z=sm.Physics.g_force.z,
-                
-                # 转向数据
-                steer_angle=sm.Physics.steer_angle,
-                
-                # 引擎数据
-                engine_temp=sm.Physics.water_temp,
-                turbo_boost=sm.Physics.turbo_boost,
-                
-                # 位置和速度
-                velocity_x=sm.Physics.velocity.x,
-                velocity_y=sm.Physics.velocity.y,
-                velocity_z=sm.Physics.velocity.z,
-                
-                # 车轮滑移
-                wheel_slip_fl=sm.Physics.wheel_slip.front_left,
-                wheel_slip_fr=sm.Physics.wheel_slip.front_right,
-                wheel_slip_rl=sm.Physics.wheel_slip.rear_left,
-                wheel_slip_rr=sm.Physics.wheel_slip.rear_right,
-                
-                # DRS和其他 (DRS在ACC中未使用，暂时设为0)
-                drs=0,
-                tc=sm.Physics.tc,
-                abs=sm.Physics.abs,
-                
-                # 圈速数据
-                lap_time=sm.Graphics.current_time,
-                last_lap=sm.Graphics.last_time,
-                best_lap=sm.Graphics.best_time
-            )
-            return None
+                    timestamp=time.time(),
+                    
+                    # 基础数据
+                    speed=sm.Physics.speed_kmh,
+                    rpm=sm.Physics.rpm,
+                    gear=sm.Physics.gear,
+                    fuel=sm.Physics.fuel,
+                    
+                    # 踏板数据
+                    throttle=sm.Physics.gas,
+                    brake=sm.Physics.brake,
+                    clutch=sm.Physics.clutch,
+                    
+                    # 轮胎压力
+                    tire_pressure_fl=sm.Physics.wheel_pressure.front_left,
+                    tire_pressure_fr=sm.Physics.wheel_pressure.front_right,
+                    tire_pressure_rl=sm.Physics.wheel_pressure.rear_left,
+                    tire_pressure_rr=sm.Physics.wheel_pressure.rear_right,
+                    
+                    # 轮胎温度
+                    tire_temp_fl=sm.Physics.tyre_core_temp.front_left,
+                    tire_temp_fr=sm.Physics.tyre_core_temp.front_right,
+                    tire_temp_rl=sm.Physics.tyre_core_temp.rear_left,
+                    tire_temp_rr=sm.Physics.tyre_core_temp.rear_right,
+                    
+                    # 刹车温度
+                    brake_temp_fl=sm.Physics.brake_temp.front_left,
+                    brake_temp_fr=sm.Physics.brake_temp.front_right,
+                    brake_temp_rl=sm.Physics.brake_temp.rear_left,
+                    brake_temp_rr=sm.Physics.brake_temp.rear_right,
+                    
+                    # 悬挂数据
+                    suspension_travel_fl=sm.Physics.suspension_travel.front_left,
+                    suspension_travel_fr=sm.Physics.suspension_travel.front_right,
+                    suspension_travel_rl=sm.Physics.suspension_travel.rear_left,
+                    suspension_travel_rr=sm.Physics.suspension_travel.rear_right,
+                    
+                    # 车辆动态
+                    acceleration_x=sm.Physics.g_force.x,
+                    acceleration_y=sm.Physics.g_force.y,
+                    acceleration_z=sm.Physics.g_force.z,
+                    
+                    # 转向数据
+                    steer_angle=sm.Physics.steer_angle,
+                    
+                    # 引擎数据
+                    engine_temp=sm.Physics.water_temp,
+                    turbo_boost=sm.Physics.turbo_boost,
+                    
+                    # 位置和速度
+                    velocity_x=sm.Physics.velocity.x,
+                    velocity_y=sm.Physics.velocity.y,
+                    velocity_z=sm.Physics.velocity.z,
+                    
+                    # 车轮滑移
+                    wheel_slip_fl=sm.Physics.wheel_slip.front_left,
+                    wheel_slip_fr=sm.Physics.wheel_slip.front_right,
+                    wheel_slip_rl=sm.Physics.wheel_slip.rear_left,
+                    wheel_slip_rr=sm.Physics.wheel_slip.rear_right,
+                    
+                    # DRS和其他 (DRS在ACC中未使用，暂时设为0)
+                    drs=0,
+                    tc=sm.Physics.tc,
+                    abs=sm.Physics.abs,
+                    
+                    # 圈速数据
+                    lap_time=sm.Graphics.current_time,
+                    last_lap=sm.Graphics.last_time,
+                    best_lap=sm.Graphics.best_time
+                )
+            else:
+                return None
         except Exception as e:
             logger.error(f"读取遥测数据时发生错误: {e}")
             raise RuntimeError(f"无法读取遥测数据: {e}")
