@@ -139,16 +139,11 @@ python -m acc_telemetry.utils.osc_sender
 ├── requirements.txt          # 项目依赖包列表
 ├── main.py                   # 主程序入口
 ├── web_telemetry_server.py   # Web遥测服务器启动脚本
-├── start_music_system.py     # 音乐系统启动脚本
+
 ├── setup.py                  # 安装配置文件
 ├── acc_telemetry/            # 核心包
 │   ├── __init__.py
-│   ├── audio/                # 音频/音乐系统模块
-│   │   ├── __init__.py
-│   │   ├── music_gui.py      # 音乐系统GUI界面
-│   │   ├── music_integration.py # 音乐集成核心
-│   │   ├── supercollider_engine.py # SuperCollider引擎
-│   │   └── start_music_system.py # 音乐系统启动器
+
 │   ├── config/               # 配置文件模块
 │   │   ├── __init__.py
 │   │   ├── config.py         # 主配置文件
@@ -186,8 +181,7 @@ python -m acc_telemetry.utils.osc_sender
 │   ├── __init__.py
 │   ├── install.py
 │   └── quality_check.py
-├── supercollider/            # SuperCollider音频引擎
-│   └── acc_music_engine.scd
+
 └── tests/                    # 测试目录
     ├── __init__.py
     ├── test_improved.py

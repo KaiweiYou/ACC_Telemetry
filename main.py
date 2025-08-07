@@ -90,7 +90,8 @@ class App(ctk.CTk):
             {"id": "dashboard", "text": "📊 实时仪表盘"},
             {"id": "telemetry", "text": "🔧 遥测配置"},
             {"id": "web", "text": "🌐 Web 遥测面板"},
-            {"id": "osc", "text": "📡 OSC 数据流"}
+            {"id": "osc", "text": "📡 OSC 数据流"},
+            {"id": "music", "text": "🎵 交互音乐"}
         ]
 
         self.menu_buttons = {}
@@ -126,6 +127,8 @@ class App(ctk.CTk):
             self.create_web_content(self.content_area)
         elif new_tab == 'osc':
             self.create_osc_content(self.content_area)
+        elif new_tab == 'music':
+            self.create_music_content(self.content_area)
         
         # 更新菜单按钮状态
         self.update_menu_buttons(self.menu_buttons, new_tab)
@@ -532,6 +535,223 @@ class App(ctk.CTk):
 
         
 
+    def create_music_content(self, parent):
+        """创建交互音乐内容页面"""
+        try:
+            # 导入交互音乐GUI和遥测数据读取器
+            from acc_telemetry.audio.music_gui import InteractiveMusicGUI
+            from acc_telemetry.core.telemetry import ACCTelemetry
+            
+            # 初始化遥测数据读取器（如果还没有的话）
+            if not hasattr(self, 'music_telemetry_reader'):
+                self.music_telemetry_reader = ACCTelemetry()
+                self.music_telemetry_reader.connect()
+            
+            # 创建遥测数据获取回调函数
+            def get_telemetry_data():
+                """获取当前遥测数据"""
+                try:
+                    # 从共享内存读取遥测数据，返回TelemetryData对象
+                    return self.music_telemetry_reader.get_telemetry()
+                except Exception as e:
+                    print(f"获取遥测数据失败: {e}")
+                    return None
+            
+            # 创建交互音乐界面
+            music_gui = InteractiveMusicGUI(parent, get_telemetry_data)
+            music_gui.pack(fill="both", expand=True)
+            
+            # 保存引用以便清理
+            if not hasattr(self, 'music_guis'):
+                self.music_guis = []
+            self.music_guis.append(music_gui)
+            
+        except ImportError as e:
+            # 如果导入失败，显示错误信息和安装指导
+            self._show_music_import_error(parent, str(e))
+        except Exception as e:
+            # 其他错误
+            self._show_music_general_error(parent, str(e))
+    
+    def _show_music_import_error(self, parent, error_msg: str):
+        """显示音乐模块导入错误界面
+        
+        Args:
+            parent: 父窗口
+            error_msg: 错误消息
+        """
+        # 标题
+        title = ctk.CTkLabel(
+            parent,
+            text="🎵 交互音乐功能",
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
+        title.pack(pady=(30, 10))
+        
+        # 错误信息
+        error_frame = ctk.CTkFrame(parent, corner_radius=15, fg_color=("#ffebee", "#4a1a1a"))
+        error_frame.pack(fill="x", padx=40, pady=20)
+        
+        error_title = ctk.CTkLabel(
+            error_frame,
+            text="❌ 模块导入失败",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=("#d32f2f", "#f44336")
+        )
+        error_title.pack(pady=(20, 10))
+        
+        error_desc = ctk.CTkLabel(
+            error_frame,
+            text="交互音乐功能需要额外的音频库支持。\n请安装以下依赖包:",
+            font=ctk.CTkFont(size=14),
+            text_color=("#666666", "#cccccc")
+        )
+        error_desc.pack(pady=(0, 15))
+        
+        # 依赖包列表
+        deps_frame = ctk.CTkFrame(error_frame, corner_radius=10)
+        deps_frame.pack(fill="x", padx=20, pady=(0, 20))
+        
+        deps_text = "pip install pygame numpy"
+        deps_label = ctk.CTkLabel(
+            deps_frame,
+            text=deps_text,
+            font=ctk.CTkFont(size=12, family="Consolas"),
+            text_color=("#2e7d32", "#4caf50")
+        )
+        deps_label.pack(pady=10)
+        
+        # 安装按钮
+        def install_dependencies():
+            """安装依赖包"""
+            try:
+                import subprocess
+                import sys
+                
+                # 显示安装进度
+                install_btn.configure(text="正在安装...", state="disabled")
+                
+                def run_install():
+                    try:
+                        # 安装pygame
+                        subprocess.check_call([sys.executable, "-m", "pip", "install", "pygame"])
+                        # 安装numpy
+                        subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
+                        
+                        # 安装成功
+                        self.after(0, lambda: [
+                            install_btn.configure(text="安装成功！", fg_color="#4caf50"),
+                            self.after(2000, lambda: self.switch_tab('music'))  # 2秒后重新加载
+                        ])
+                    except subprocess.CalledProcessError as e:
+                        self.after(0, lambda: [
+                            install_btn.configure(text="安装失败", state="normal", fg_color="#f44336"),
+                            self.show_error_dialog(f"依赖包安装失败: {e}")
+                        ])
+                
+                # 在后台线程中运行安装
+                threading.Thread(target=run_install, daemon=True).start()
+                
+            except Exception as e:
+                self.show_error_dialog(f"安装过程出错: {e}")
+        
+        install_btn = ctk.CTkButton(
+            error_frame,
+            text="🔧 自动安装依赖",
+            command=install_dependencies,
+            height=40,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            fg_color="#2196f3",
+            hover_color="#1976d2"
+        )
+        install_btn.pack(pady=(0, 20))
+        
+        # 详细错误信息（可折叠）
+        details_frame = ctk.CTkFrame(parent, corner_radius=15)
+        details_frame.pack(fill="x", padx=40, pady=10)
+        
+        details_title = ctk.CTkLabel(
+            details_frame,
+            text="🔍 详细错误信息",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        details_title.pack(pady=(15, 5))
+        
+        details_text = ctk.CTkTextbox(
+            details_frame,
+            height=100,
+            font=ctk.CTkFont(size=11, family="Consolas")
+        )
+        details_text.pack(fill="x", padx=15, pady=(0, 15))
+        details_text.insert("1.0", error_msg)
+        details_text.configure(state="disabled")
+    
+    def _show_music_general_error(self, parent, error_msg: str):
+        """显示音乐功能一般错误界面
+        
+        Args:
+            parent: 父窗口
+            error_msg: 错误消息
+        """
+        # 标题
+        title = ctk.CTkLabel(
+            parent,
+            text="🎵 交互音乐功能",
+            font=ctk.CTkFont(size=24, weight="bold")
+        )
+        title.pack(pady=(30, 10))
+        
+        # 错误信息
+        error_frame = ctk.CTkFrame(parent, corner_radius=15, fg_color=("#ffebee", "#4a1a1a"))
+        error_frame.pack(fill="x", padx=40, pady=20)
+        
+        error_title = ctk.CTkLabel(
+            error_frame,
+            text="⚠️ 功能初始化失败",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=("#ff9800", "#ffb74d")
+        )
+        error_title.pack(pady=(20, 10))
+        
+        error_desc = ctk.CTkLabel(
+            error_frame,
+            text="交互音乐功能初始化时遇到问题。\n请检查系统音频设备和相关配置。",
+            font=ctk.CTkFont(size=14),
+            text_color=("#666666", "#cccccc")
+        )
+        error_desc.pack(pady=(0, 15))
+        
+        # 重试按钮
+        retry_btn = ctk.CTkButton(
+            error_frame,
+            text="🔄 重试",
+            command=lambda: self.switch_tab('music'),
+            height=40,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            fg_color="#ff9800",
+            hover_color="#f57c00"
+        )
+        retry_btn.pack(pady=(0, 20))
+        
+        # 详细错误信息
+        details_frame = ctk.CTkFrame(parent, corner_radius=15)
+        details_frame.pack(fill="x", padx=40, pady=10)
+        
+        details_title = ctk.CTkLabel(
+            details_frame,
+            text="🔍 错误详情",
+            font=ctk.CTkFont(size=16, weight="bold")
+        )
+        details_title.pack(pady=(15, 5))
+        
+        details_text = ctk.CTkTextbox(
+            details_frame,
+            height=80,
+            font=ctk.CTkFont(size=11, family="Consolas")
+        )
+        details_text.pack(fill="x", padx=15, pady=(0, 15))
+        details_text.insert("1.0", error_msg)
+        details_text.configure(state="disabled")
         
     def show_error_dialog(self, message: str):
         """显示现代化错误对话框"""

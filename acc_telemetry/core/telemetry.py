@@ -147,8 +147,10 @@ class ACCTelemetry:
         Raises:
             RuntimeError: 当读取共享内存失败时
         """
+        # 如果未连接，尝试自动连接
         if not self.is_connected():
-            return None
+            if not self.connect():
+                return None
             
         try:
             sm = self.asm.read_shared_memory()
