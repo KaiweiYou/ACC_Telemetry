@@ -58,9 +58,13 @@ class App(ctk.CTk):
         self.content_area = ctk.CTkFrame(self.main_container, corner_radius=15)
         self.content_area.pack(side="left", fill="both", expand=True)
 
+        # 组件缓存，避免重复创建
+        self._content_cache = {}
+        
         # 初始化时显示默认标签页
-        self.current_tab = ctk.StringVar(value="dashboard")
-        self.switch_tab("dashboard")
+        self.current_tab = ctk.StringVar(value="")  # 初始为空，确保首次加载
+        # 延迟加载，确保UI完全初始化
+        self.after(100, lambda: self.switch_tab("dashboard"))
 
     def center_window(self, width=1200, height=800):
         """将窗口居中显示
@@ -150,26 +154,47 @@ class App(ctk.CTk):
         self.update_menu_buttons(self.menu_buttons, new_tab)
 
     def _get_or_create_content(self, tab_name):
-        """获取或创建内容组件 - 每次都重新创建避免引用问题"""
+        """获取或创建内容组件 - 使用缓存避免重复创建"""
         try:
+            # 检查缓存
+            if tab_name in self._content_cache:
+                cached_widget = self._content_cache[tab_name]
+                if cached_widget.winfo_exists():
+                    return cached_widget
+                else:
+                    # 组件已销毁，从缓存中移除
+                    del self._content_cache[tab_name]
+            
+            # 创建新组件
             content = self._create_content_sync(tab_name)
+            if content:
+                self._content_cache[tab_name] = content
             return content
         except Exception as e:
             logger.error(f"创建 {tab_name} 页面失败: {e}")
             return self._create_error_page(tab_name, str(e))
 
     def _show_content(self, content_widget):
-        """显示指定组件，清理其他组件"""
-        # 清理内容区域的所有子组件
+        """显示指定组件，清理其他组件但保留缓存"""
+        if not content_widget:
+            return
+            
+        # 清理内容区域的所有子组件（但不销毁缓存的组件）
         for widget in self.content_area.winfo_children():
             try:
-                widget.destroy()
+                widget.pack_forget()  # 隐藏而非销毁
             except Exception as e:
-                logger.warning(f"清理组件时出错: {e}")
+                logger.warning(f"隐藏组件时出错: {e}")
         
-        # 显示新组件
-        if content_widget and content_widget.winfo_exists():
+        # 确保组件存在且有效
+        if content_widget.winfo_exists():
+            # 如果组件已有父容器，先移除
+            if content_widget.winfo_parent():
+                content_widget.pack_forget()
+            
+            # 显示新组件
             content_widget.pack(fill="both", expand=True)
+            self.content_area.update_idletasks()
 
     def _create_error_page(self, tab_name, error_msg):
         """创建错误页面"""
@@ -238,19 +263,22 @@ class App(ctk.CTk):
         from acc_telemetry.ui.dashboard import AccDashboard
 
         dashboard = AccDashboard(parent)
-        dashboard.pack(fill="both", expand=True)
+        return dashboard
 
     def create_telemetry_content(self, parent):
         """创建遥测配置内容页面"""
         from acc_telemetry.ui.telemetry_settings import TelemetrySettings
 
         settings_frame = TelemetrySettings(parent, self)
-        settings_frame.pack(fill="both", expand=True)
+        return settings_frame
 
     def create_web_content(self, parent):
         """创建Web遥测面板内容页面"""
         import socket
         import threading
+
+        # 创建主容器
+        web_frame = ctk.CTkFrame(parent)
 
         # Web服务器进程跟踪
         self.web_server = None
@@ -258,13 +286,13 @@ class App(ctk.CTk):
 
         # 标题
         title = ctk.CTkLabel(
-            parent, text="🌐 Web 遥测面板", font=ctk.CTkFont(size=24, weight="bold")
+            web_frame, text="🌐 Web 遥测面板", font=ctk.CTkFont(size=24, weight="bold")
         )
         title.pack(pady=(30, 10))
 
         # 描述
         desc = ctk.CTkLabel(
-            parent,
+            web_frame,
             text="启动Web服务器，通过浏览器访问实时遥测数据\n支持手机、平板等移动设备访问",
             font=ctk.CTkFont(size=14),
             text_color=("gray70", "gray30"),
@@ -272,7 +300,7 @@ class App(ctk.CTk):
         desc.pack(pady=(0, 20))
 
         # Web服务器配置表单
-        form_frame = ctk.CTkFrame(parent, corner_radius=15)
+        form_frame = ctk.CTkFrame(web_frame, corner_radius=15)
         form_frame.pack(fill="x", padx=40, pady=20)
 
         # 端口配置
@@ -338,7 +366,7 @@ class App(ctk.CTk):
         port_var.trace("w", update_access_urls)
 
         # 状态显示
-        status_frame = ctk.CTkFrame(parent, corner_radius=15)
+        status_frame = ctk.CTkFrame(web_frame, corner_radius=15)
         status_frame.pack(fill="x", padx=40, pady=(0, 20))
 
         status_label = ctk.CTkLabel(
@@ -349,7 +377,7 @@ class App(ctk.CTk):
         status_label.pack(pady=20)
 
         # 控制按钮
-        button_frame = ctk.CTkFrame(parent, fg_color="transparent")
+        button_frame = ctk.CTkFrame(web_frame, fg_color="transparent")
         button_frame.pack(fill="x", padx=40, pady=20)
 
         def start_web_server():
@@ -438,7 +466,7 @@ class App(ctk.CTk):
         open_btn.pack(side="left", padx=(10, 0), fill="x", expand=True)
 
         # 使用说明
-        info_frame = ctk.CTkFrame(parent, corner_radius=15)
+        info_frame = ctk.CTkFrame(web_frame, corner_radius=15)
         info_frame.pack(fill="x", padx=40, pady=(0, 20))
 
         info_title = ctk.CTkLabel(
@@ -454,6 +482,8 @@ class App(ctk.CTk):
             justify="left",
         )
         info_text.pack(anchor="w", padx=20, pady=(0, 20))
+
+        return web_frame
 
     def create_osc_content(self, parent):
         """创建OSC配置内容页面"""

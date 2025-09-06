@@ -43,11 +43,13 @@ def setup_logging(
 
     # 创建日志记录器
     logger = logging.getLogger(app_name)
+    
+    # 如果已经配置过，直接返回
+    if logger.handlers:
+        return logger
+        
     logger.setLevel(numeric_level)
-
-    # 清除现有处理器
-    for handler in logger.handlers[:]:
-        logger.removeHandler(handler)
+    logger.propagate = False  # 防止日志传播到根记录器
 
     # 日志格式
     formatter = logging.Formatter(
@@ -83,8 +85,9 @@ def setup_logging(
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
-    # 设置为根日志记录器
-    logging.root = logger
+    # 避免重复设置根日志记录器
+    if not logging.root.handlers:
+        logging.root.addHandler(logging.NullHandler())
 
     return logger
 

@@ -20,7 +20,8 @@ try:
     DOTENV_AVAILABLE = True
 except ImportError:
     DOTENV_AVAILABLE = False
-    logging.warning("python-dotenv未安装，将只从系统环境变量加载配置")
+    # 使用print而不是logging避免重复日志
+    print("WARNING: python-dotenv未安装，将只从系统环境变量加载配置")
 
 
 class Config:
