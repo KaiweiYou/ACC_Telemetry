@@ -27,3 +27,6 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
+
+# Songs and audio files
+songs/
