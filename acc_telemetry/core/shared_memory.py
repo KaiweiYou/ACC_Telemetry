@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import copy
@@ -82,7 +83,6 @@ class ACC_FLAG_TYPE(Enum):
 
 
 class ACC_PENALTY_TYPE(Enum):
-
     """
     Wrong way is 22 now ?
     What's 18 then ?
@@ -475,8 +475,7 @@ class accSM(mmap.mmap):
 
         return value
 
-    def unpack_array2D(
-            self, value_type: str, count: int, subCount: int) -> tuple:
+    def unpack_array2D(self, value_type: str, count: int, subCount: int) -> tuple:
         data = []
         for _ in range(count):
             data.append(self.unpack_array(value_type, subCount))
@@ -491,18 +490,15 @@ def read_physic_map(physic_map: accSM) -> PhysicsMap:
     physic_map.seek(0)
     temp = {
         "packetID": physic_map.unpack_value("i"),
-
         "gas": physic_map.unpack_value("f"),
         "brake": physic_map.unpack_value("f"),
         "fuel": physic_map.unpack_value("f"),
         "gear": physic_map.unpack_value("i"),
         "rpm": physic_map.unpack_value("i"),
         "steerAngle": physic_map.unpack_value("f"),
-
         "speedKmh": physic_map.unpack_value("f"),
         "velocity": physic_map.unpack_array("f", 3),
         "accG": physic_map.unpack_array("f", 3),
-
         "wheelSlip": physic_map.unpack_array("f", 4),
         # Field is not used by ACC
         "wheelLoad": physic_map.unpack_array("f", 4),
@@ -516,7 +512,6 @@ def read_physic_map(physic_map: accSM) -> PhysicsMap:
         # Field is not used by ACC
         "camberRAD": physic_map.unpack_array("f", 4),
         "suspensionTravel": physic_map.unpack_array("f", 4),
-
         # Field is not used by ACC
         "drs": physic_map.unpack_value("i"),
         "tc": physic_map.unpack_value("f"),
@@ -530,12 +525,10 @@ def read_physic_map(physic_map: accSM) -> PhysicsMap:
         "numberOfTyresOut": physic_map.unpack_value("i"),
         "pitLimiterOn": physic_map.unpack_value("i"),
         "abs": physic_map.unpack_value("f"),
-
         # Field is not used by ACC
         "kersCharge": physic_map.unpack_value("f"),
         # Field is not used by ACC
         "kersInput": physic_map.unpack_value("f"),
-
         "autoshifterOn": physic_map.unpack_value("i"),
         # Field is not used by ACC
         "rideHeight": physic_map.unpack_array("f", 2),
@@ -550,7 +543,6 @@ def read_physic_map(physic_map: accSM) -> PhysicsMap:
         "FinalFF": physic_map.unpack_value("f"),
         # Field is not used by ACC
         "performanceMeter": physic_map.unpack_value("f"),
-
         # Field is not used by ACC
         "engineBrake": physic_map.unpack_value("i"),
         # Field is not used by ACC
@@ -563,40 +555,30 @@ def read_physic_map(physic_map: accSM) -> PhysicsMap:
         "ersIsCharging": physic_map.unpack_value("i"),
         # Field is not used by ACC
         "kersCurrentKJ": physic_map.unpack_value("f"),
-
         # Field is not used by ACC
         "drsAvailable": physic_map.unpack_value("i"),
         # Field is not used by ACC
         "drsEnabled": physic_map.unpack_value("i"),
-
         "brakeTemp": physic_map.unpack_array("f", 4),
         "clutch": physic_map.unpack_value("f"),
-
         # Field is not used by ACC
         "tyreTempI": physic_map.unpack_array("f", 4),
         # Field is not used by ACC
         "tyreTempM": physic_map.unpack_array("f", 4),
         # Field is not used by ACC
         "tyreTempO": physic_map.unpack_array("f", 4),
-
         "isAIControlled": physic_map.unpack_value("i"),
-
         "tyreContactPoint": physic_map.unpack_array2D("f", 4, 3),
         "tyreContactNormal": physic_map.unpack_array2D("f", 4, 3),
         "tyreContactHeading": physic_map.unpack_array2D("f", 4, 3),
-
         "brakeBias": physic_map.unpack_value("f"),
-
         "localVelocity": physic_map.unpack_array("f", 3),
-
         # Field is not used by ACC
         "P2PActivation": physic_map.unpack_value("i"),
         # Field is not used by ACC
         "P2PStatus ": physic_map.unpack_value("i"),
-
         # Field is not used by ACC
         "currentMaxRpm": physic_map.unpack_value("i"),
-
         # Field is not used by ACC
         "mz": physic_map.unpack_array("f", 4),
         # Field is not used by ACC
@@ -605,7 +587,6 @@ def read_physic_map(physic_map: accSM) -> PhysicsMap:
         "my": physic_map.unpack_array("f", 4),
         "slipRatio": physic_map.unpack_array("f", 4),
         "slipAngle": physic_map.unpack_array("f", 4),
-
         # Field is not used by ACC
         "tcinAction": physic_map.unpack_value("i"),
         # Field is not used by ACC
@@ -615,17 +596,14 @@ def read_physic_map(physic_map: accSM) -> PhysicsMap:
         # Field is not used by ACC
         "tyreTemp": physic_map.unpack_array("f", 4),
         "waterTemp": physic_map.unpack_value("f"),
-
         "brakePressure": physic_map.unpack_array("f", 4),
         "frontBrakeCompound": physic_map.unpack_value("i"),
         "rearBrakeCompound": physic_map.unpack_value("i"),
         "padLife": physic_map.unpack_array("f", 4),
         "discLife": physic_map.unpack_array("f", 4),
-
         "ignitionOn": physic_map.unpack_value("i"),
         "starterEngineOn": physic_map.unpack_value("i"),
         "isEngineRunning": physic_map.unpack_value("i"),
-
         "kerbVibration": physic_map.unpack_value("f"),
         "slipVibrations": physic_map.unpack_value("f"),
         "gVibrations": physic_map.unpack_value("f"),
@@ -713,7 +691,6 @@ def read_graphics_map(graphic_map: accSM) -> GraphicsMap:
         # Field is not used by ACC
         "replayTimeMultiplier": graphic_map.unpack_value("f"),
         "normalizedCarPosition": graphic_map.unpack_value("f"),
-
         "activeCars": graphic_map.unpack_value("i"),
         "carCoordinates": graphic_map.unpack_array2D("f", 60, 3),
         "carID": graphic_map.unpack_array("i", 60),
@@ -773,18 +750,14 @@ def read_graphics_map(graphic_map: accSM) -> GraphicsMap:
         "mfdTyrePressureFR": graphic_map.unpack_value("f"),
         "mfdTyrePressureRL": graphic_map.unpack_value("f"),
         "mfdTyrePressureRR": graphic_map.unpack_value("f"),
-        "trackGripStatus": ACC_TRACK_GRIP_STATUS(
-            graphic_map.unpack_value("i")),
-        "rainIntensity": ACC_RAIN_INTENSITY(
-            graphic_map.unpack_value("i")),
-        "rainIntensityIn10min": ACC_RAIN_INTENSITY(
-            graphic_map.unpack_value("i")),
-        "rainIntensityIn30min": ACC_RAIN_INTENSITY(
-            graphic_map.unpack_value("i")),
+        "trackGripStatus": ACC_TRACK_GRIP_STATUS(graphic_map.unpack_value("i")),
+        "rainIntensity": ACC_RAIN_INTENSITY(graphic_map.unpack_value("i")),
+        "rainIntensityIn10min": ACC_RAIN_INTENSITY(graphic_map.unpack_value("i")),
+        "rainIntensityIn30min": ACC_RAIN_INTENSITY(graphic_map.unpack_value("i")),
         "currentTyreSet": graphic_map.unpack_value("i"),
         "strategyTyreSet": graphic_map.unpack_value("i"),
         "gapAhead": graphic_map.unpack_value("i"),
-        "gapBehind": graphic_map.unpack_value("i")
+        "gapBehind": graphic_map.unpack_value("i"),
     }
 
     return GraphicsMap(
@@ -864,7 +837,8 @@ def read_graphics_map(graphic_map: accSM) -> GraphicsMap:
             temp["mfdTyrePressureFL"],
             temp["mfdTyrePressureFR"],
             temp["mfdTyrePressureRL"],
-            temp["mfdTyrePressureRR"]),
+            temp["mfdTyrePressureRR"],
+        ),
         track_grip_status=temp["trackGripStatus"],
         rain_intensity=temp["rainIntensity"],
         rain_intensity_in_10min=temp["rainIntensityIn10min"],
@@ -942,7 +916,7 @@ def read_static_map(static_map: accSM) -> StaticsMap:
         "PitWindowEnd": static_map.unpack_value("i"),
         "isOnline": static_map.unpack_value("i"),
         "dryTyresName": static_map.unpack_string(33),
-        "wetTyresName": static_map.unpack_string(33)
+        "wetTyresName": static_map.unpack_string(33),
     }
 
     return StaticsMap(
@@ -968,7 +942,7 @@ def read_static_map(static_map: accSM) -> StaticsMap:
         temp["PitWindowEnd"],
         bool(temp["isOnline"]),
         temp["dryTyresName"],
-        temp["wetTyresName"]
+        temp["wetTyresName"],
     )
 
 
@@ -977,20 +951,23 @@ def penalty_workarround(graphic_map: accSM) -> ACC_PENALTY_TYPE:
     try:
         return ACC_PENALTY_TYPE(graphic_map.unpack_value("i"))
 
-    except(ValueError):
+    except ValueError:
         return ACC_PENALTY_TYPE.UnknownValue
 
 
-class accSharedMemory():
+class accSharedMemory:
 
     def __init__(self) -> None:
 
-        self.physicSM = accSM(-1, 800, tagname="Local\\acpmf_physics",
-                              access=mmap.ACCESS_WRITE)
-        self.graphicSM = accSM(-1, 1588, tagname="Local\\acpmf_graphics",
-                               access=mmap.ACCESS_WRITE)
-        self.staticSM = accSM(-1, 784, tagname="Local\\acpmf_static",
-                              access=mmap.ACCESS_WRITE)
+        self.physicSM = accSM(
+            -1, 800, tagname="Local\\acpmf_physics", access=mmap.ACCESS_WRITE
+        )
+        self.graphicSM = accSM(
+            -1, 1588, tagname="Local\\acpmf_graphics", access=mmap.ACCESS_WRITE
+        )
+        self.staticSM = accSM(
+            -1, 784, tagname="Local\\acpmf_static", access=mmap.ACCESS_WRITE
+        )
 
         self.physics_old = None
         self.last_physicsID = 0
@@ -1001,9 +978,10 @@ class accSharedMemory():
         graphics = read_graphics_map(self.graphicSM)
         statics = read_static_map(self.staticSM)
 
-        if (physics.packed_id == self.last_physicsID
-                or (self.physics_old is not None
-                    and PhysicsMap.is_equal(self.physics_old, physics))):
+        if physics.packed_id == self.last_physicsID or (
+            self.physics_old is not None
+            and PhysicsMap.is_equal(self.physics_old, physics)
+        ):
             return None
 
         else:
@@ -1011,16 +989,24 @@ class accSharedMemory():
             return ACC_map(physics, graphics, statics)
 
     def get_shared_memory_data(self) -> ACC_map:
-
-        # try 1000 time to get the data, else raise exception
-        for i in range(1000):
-
+        """获取共享内存数据，优化版本
+        
+        减少重试次数并添加更智能的超时机制，
+        避免在游戏未运行时长时间阻塞。
+        """
+        # 最多重试50次，每次间隔20ms，总超时约1秒
+        max_retries = 50
+        retry_delay = 0.02  # 20ms
+        
+        for i in range(max_retries):
             data = self.read_shared_memory()
             if data is not None:
                 return data
-
-        else:
-            raise SharedMemoryTimeout("No data available to read")
+            
+            # 短暂延迟避免CPU占用过高
+            time.sleep(retry_delay)
+            
+        raise SharedMemoryTimeout("No data available to read")
 
     def close(self) -> None:
         print("[ASM_Reader]: Closing memory maps.")

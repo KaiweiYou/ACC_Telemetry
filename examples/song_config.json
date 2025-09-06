@@ -1,0 +1,39 @@
+{
+  "songs_root_dir": "./songs",
+  "playback_settings": {
+    "mode": "sequential",
+    "auto_advance": true,
+    "shuffle_on_start": false,
+    "repeat_current": false
+  },
+  "audio_settings": {
+    "sample_rate": 44100,
+    "buffer_size": 1024,
+    "fade_duration": 2.0,
+    "crossfade_enabled": true
+  },
+  "file_structure": {
+    "required_files": [
+      "drums.wav",
+      "bass.wav",
+      "vocals.wav",
+      "other.wav",
+      "analysis.json"
+    ],
+    "supported_formats": [".wav", ".mp3", ".flac"],
+    "subfolder_depth": 3
+  },
+  "metadata_extraction": {
+    "read_id3_tags": true,
+    "fallback_to_filename": true,
+    "genre_mapping": {
+      "electronic": "Electronic",
+      "rock": "Rock",
+      "pop": "Pop",
+      "classical": "Classical",
+      "jazz": "Jazz",
+      "hiphop": "Hip-Hop",
+      "unknown": "Unknown"
+    }
+  }
+}

@@ -20,17 +20,18 @@ Web面板允许通过浏览器访问实时遥测数据，支持手机、平板�
 4. 在手机浏览器中访问局域网地址
 """
 
-import sys
 import os
 import socket
+import sys
 import threading
 import time
 
 # 添加项目根目录到Python路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from acc_telemetry.web import WebTelemetryServer
 from acc_telemetry.core.telemetry import ACCTelemetry
+from acc_telemetry.web import WebTelemetryServer
+
 
 def get_local_ip():
     """获取本机局域网IP地址"""
@@ -43,6 +44,7 @@ def get_local_ip():
     except Exception:
         return "127.0.0.1"
 
+
 def check_acc_connection():
     """检查ACC游戏连接状态"""
     try:
@@ -52,11 +54,12 @@ def check_acc_connection():
     except Exception:
         return False
 
+
 def main():
-    print("="*70)
+    print("=" * 70)
     print("🏎️  ACC 遥测 Web 面板示例")
-    print("="*70)
-    
+    print("=" * 70)
+
     # 检查ACC连接
     print("🔍 检查ACC游戏连接...")
     if check_acc_connection():
@@ -69,29 +72,29 @@ def main():
         print("   3. 正在进行比赛或练习")
         print("")
         response = input("是否继续启动Web服务器? (y/n): ")
-        if response.lower() != 'y':
+        if response.lower() != "y":
             print("已取消启动")
             return
-    
+
     print("")
-    
+
     # 配置服务器参数
-    host = '0.0.0.0'  # 监听所有网络接口
+    host = "0.0.0.0"  # 监听所有网络接口
     port = 8080
     local_ip = get_local_ip()
-    
+
     print("🌐 Web服务器配置:")
     print(f"   服务器地址: {host}:{port}")
     print(f"   本机访问:   http://localhost:{port}")
     print(f"   局域网访问: http://{local_ip}:{port}")
     print("")
-    
+
     print("📱 移动设备访问指南:")
     print("   1. 确保设备与电脑在同一WiFi网络")
     print(f"   2. 在移动设备浏览器中输入: http://{local_ip}:{port}")
     print("   3. 建议使用横屏模式以获得最佳体验")
     print("")
-    
+
     print("🎛️  仪表盘功能:")
     print("   - 实时显示车辆速度、转速、档位等基础数据")
     print("   - 监控轮胎压力和温度")
@@ -99,33 +102,33 @@ def main():
     print("   - 车辆动态数据(G力、转向角度等)")
     print("   - 圈速和辅助系统状态")
     print("")
-    
+
     print("⚠️  注意事项:")
     print("   - 确保防火墙允许端口访问")
     print("   - 数据更新频率约60fps")
     print("   - 按 Ctrl+C 停止服务器")
-    print("="*70)
+    print("=" * 70)
     print("")
-    
+
     # 创建并启动Web服务器
     try:
         print("🚀 正在启动Web遥测服务器...")
         server = WebTelemetryServer(host=host, port=port)
-        
+
         # 在单独线程中启动服务器，以便可以添加额外功能
         def start_server():
             server.start()
-        
+
         server_thread = threading.Thread(target=start_server)
         server_thread.daemon = True
         server_thread.start()
-        
+
         print(f"✅ 服务器已启动! 请在浏览器中访问: http://localhost:{port}")
         print(f"📱 手机访问地址: http://{local_ip}:{port}")
         print("")
         print("💡 提示: 打开浏览器后，您应该能看到实时更新的遥测数据")
         print("")
-        
+
         # 保持主线程运行
         try:
             while True:
@@ -134,7 +137,7 @@ def main():
             print("\n\n🛑 正在停止服务器...")
             server.stop()
             print("✅ 服务器已停止")
-            
+
     except Exception as e:
         print(f"❌ 服务器启动失败: {e}")
         print("\n🔧 可能的解决方案:")
@@ -142,7 +145,7 @@ def main():
         print("   2. 尝试以管理员权限运行")
         print("   3. 检查防火墙设置")
         print("   4. 尝试使用其他端口")
-        
+
         # 提供端口更改选项
         try:
             new_port = input(f"\n是否尝试使用其他端口? 输入新端口号 (当前: {port}): ")
@@ -156,5 +159,6 @@ def main():
         except Exception as e2:
             print(f"❌ 仍然失败: {e2}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

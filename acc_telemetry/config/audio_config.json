@@ -1,0 +1,68 @@
+{
+  "rhythm": {
+    "bpm_range": [60, 180],
+    "rpm_range": [1000, 8000],
+    "beat_intensity_range": [0.3, 1.0],
+    "speed_range": [0, 300],
+    "gear_beat_patterns": {
+      "1": "kick",
+      "2": "kick_snare",
+      "3": "full_kit",
+      "4": "electronic",
+      "5": "complex",
+      "6": "race_mode"
+    },
+    "rpm_sensitivity": 1.0,
+    "speed_sensitivity": 1.0
+  },
+  "melody": {
+    "pitch_range": [36, 84],
+    "base_pitch": 60,
+    "steer_angle_range": [-540, 540],
+    "steer_pitch_influence": 12,
+    "throttle_volume_range": [0.3, 1.0],
+    "brake_pitch_drop": 6,
+    "scale_type": "pentatonic",
+    "key": "C",
+    "steer_sensitivity": 1.0,
+    "throttle_sensitivity": 1.0,
+    "brake_sensitivity": 1.0
+  },
+  "effects": {
+    "pan_range": [-1.0, 1.0],
+    "lateral_g_range": [-3.0, 3.0],
+    "distortion_range": [0.0, 0.8],
+    "wheel_slip_threshold": 0.1,
+    "reverb_range": [0.1, 0.6],
+    "speed_reverb_range": [50, 250],
+    "filter_freq_range": [200, 8000],
+    "engine_temp_range": [70, 120],
+    "enable_turbo_sound": true,
+    "enable_drs_sound": true,
+    "enable_tc_abs_sound": true,
+    "effects_sensitivity": 1.0
+  },
+  "ambience": {
+    "warmth_range": [0.2, 0.9],
+    "temp_range": [70, 120],
+    "enable_lap_feedback": true,
+    "best_lap_celebration": true,
+    "enable_warning_sounds": true,
+    "warning_volume": 0.7,
+    "ambient_volume": 0.3,
+    "ambient_type": "engine_hum"
+  },
+  "global": {
+    "audio_engine": "pygame_stems",
+    "master_volume": 0.8,
+    "sample_rate": 44100,
+    "buffer_size": 512,
+    "update_rate": 60,
+    "output_device": "PHL 279M1RV (NVIDIA High Definition Audio)",
+    "enable_rhythm": true,
+    "enable_melody": true,
+    "enable_effects": true,
+    "enable_ambience": true,
+    "current_preset": "default"
+  }
+}

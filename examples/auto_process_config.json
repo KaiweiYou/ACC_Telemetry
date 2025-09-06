@@ -1,0 +1,14 @@
+{
+  "input_directory": "./music_input",
+  "output_directory": "./songs",
+  "audio_extensions": [
+    ".mp3",
+    ".wav",
+    ".flac",
+    ".m4a",
+    ".ogg"
+  ],
+  "demucs_model": "htdemucs",
+  "skip_existing": true,
+  "auto_cleanup": true
+}

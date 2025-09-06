@@ -12,10 +12,11 @@ ACC_Telemetry 安装脚本
 """
 
 import os
-import sys
-import subprocess
-import shutil
 import platform
+import shutil
+import subprocess
+import sys
+
 
 def print_header():
     """打印安装脚本头部信息"""
@@ -25,36 +26,40 @@ def print_header():
     print("这个脚本将帮助您安装和配置ACC_Telemetry项目。")
     print("====================================")
 
+
 def check_python_version():
     """检查Python版本"""
     print("\n[1/5] 检查Python版本...")
-    
+
     major, minor = sys.version_info[:2]
     print(f"检测到Python版本: {major}.{minor}")
-    
+
     if major < 3 or (major == 3 and minor < 8):
         print("错误: 需要Python 3.8或更高版本")
         return False
-    
+
     print("✓ Python版本符合要求")
     return True
+
 
 def install_dependencies():
     """安装必要的依赖项"""
     print("\n[2/5] 安装依赖项...")
-    
+
     # 询问安装方式
     print("请选择安装方式:")
     print("  1. 使用requirements.txt安装依赖")
     print("  2. 使用setup.py安装整个包（推荐）")
-    
+
     install_method = input("请选择 (1/2): ").strip()
-    
+
     if install_method == "1":
         # 使用requirements.txt安装
         print("使用requirements.txt安装依赖项...")
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
+            )
             print("✓ 依赖项安装成功")
         except subprocess.CalledProcessError as e:
             print(f"错误: 安装依赖项失败: {e}")
@@ -68,77 +73,77 @@ def install_dependencies():
         except subprocess.CalledProcessError as e:
             print(f"错误: 安装ACC_Telemetry包失败: {e}")
             return False
-    
+
     # 询问是否安装可选包
-    optional_packages = [
-        "matplotlib",
-        "numpy",
-        "pandas",
-        "pyserial"
-    ]
-    
+    optional_packages = ["matplotlib", "numpy", "pandas", "pyserial"]
+
     print("\n以下是可选的依赖项，用于示例程序和高级功能:")
     for i, package in enumerate(optional_packages):
         print(f"  {i+1}. {package}")
-    
+
     install_optional = input("\n是否安装这些可选依赖项? (y/n): ").strip().lower()
-    
-    if install_optional == 'y':
+
+    if install_optional == "y":
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install"] + optional_packages)
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install"] + optional_packages
+            )
             print("✓ 可选依赖项安装成功")
         except subprocess.CalledProcessError as e:
             print(f"警告: 安装可选依赖项失败: {e}")
             print("您可以稍后手动安装这些包")
-    
+
     return True
+
 
 def check_acc_installation():
     """检查ACC游戏安装"""
     print("\n[3/5] 检查ACC游戏安装...")
-    
+
     # 检测操作系统
     system = platform.system()
     print(f"检测到操作系统: {system}")
-    
+
     if system == "Windows":
         # 常见的ACC安装路径
         possible_paths = [
             "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Assetto Corsa Competizione",
             "D:\\Steam\\steamapps\\common\\Assetto Corsa Competizione",
-            "E:\\Steam\\steamapps\\common\\Assetto Corsa Competizione"
+            "E:\\Steam\\steamapps\\common\\Assetto Corsa Competizione",
         ]
-        
+
         for path in possible_paths:
             if os.path.exists(path):
                 print(f"✓ 在 {path} 找到ACC游戏安装")
                 return True
-        
+
         print("警告: 未找到ACC游戏安装")
         print("请确保ACC游戏已安装，并且在运行遥测工具时启动游戏")
     else:
         print("注意: 在非Windows系统上，无法自动检测ACC游戏安装")
         print("请确保ACC游戏已安装，并且在运行遥测工具时启动游戏")
-    
+
     return True  # 即使没有找到游戏，也继续安装
+
 
 def create_config():
     """创建或更新配置文件"""
     print("\n[4/5] 创建配置文件...")
-    
+
     config_path = "config.py"
-    
+
     # 检查配置文件是否已存在
     if os.path.exists(config_path):
         overwrite = input(f"{config_path} 已存在。是否覆盖? (y/n): ").strip().lower()
-        if overwrite != 'y':
+        if overwrite != "y":
             print("保留现有配置文件")
             return True
-    
+
     # 复制默认配置文件
     try:
         with open(config_path, "w", encoding="utf-8") as f:
-            f.write('''
+            f.write(
+                """
 # ACC_Telemetry 配置文件
 
 # OSC发送配置
@@ -201,12 +206,14 @@ ADVANCED_CONFIG = {
     # 重试间隔 (秒)
     'retry_interval': 0.1
 }
-''')
+"""
+            )
         print(f"✓ 配置文件已创建: {config_path}")
         return True
     except Exception as e:
         print(f"错误: 创建配置文件失败: {e}")
         return False
+
 
 def print_instructions():
     """打印使用说明"""
@@ -217,19 +224,19 @@ def print_instructions():
     print("\n运行方式:")
     print("  1. 启动Assetto Corsa Competizione游戏")
     print("  2. 使用以下命令运行不同功能:")
-    
+
     # 如果使用setup.py安装了包
     print("\n  如果您使用setup.py安装了包:")
     print("     - 终端显示:  acc-telemetry terminal")
     print("     - 图形仪表盘: acc-telemetry dashboard")
     print("     - OSC数据发送: acc-telemetry osc")
-    
+
     # 如果直接运行脚本
     print("\n  或者直接运行脚本:")
     print("     - 终端显示:  python main.py terminal")
     print("     - 图形仪表盘: python main.py dashboard")
     print("     - OSC数据发送: python main.py osc")
-    
+
     print("\n示例程序:")
     print("  examples目录包含多个示例程序，展示了如何使用ACC_Telemetry的不同功能")
     print("  详情请参阅 examples/README.md")
@@ -239,32 +246,34 @@ def print_instructions():
     print("  运行 python test_telemetry.py 可以测试基本功能")
     print("====================================")
 
+
 def main():
     """主函数"""
     print_header()
-    
+
     # 检查Python版本
     if not check_python_version():
         print("\n安装失败: Python版本不符合要求")
         return False
-    
+
     # 安装依赖项
     if not install_dependencies():
         print("\n安装失败: 无法安装必要的依赖项")
         return False
-    
+
     # 检查ACC游戏安装
     check_acc_installation()
-    
+
     # 创建配置文件
     if not create_config():
         print("\n安装失败: 无法创建配置文件")
         return False
-    
+
     # 打印使用说明
     print_instructions()
-    
+
     return True
+
 
 if __name__ == "__main__":
     try:

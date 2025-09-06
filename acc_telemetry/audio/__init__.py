@@ -11,20 +11,26 @@ ACC遥测交互音乐模块
 - 遥测数据到音乐参数的映射
 - 实时音乐生成和播放
 - 音乐配置和个性化设置
+- MBUX Sound Drive 风格的驾驶音乐体验
 - 音乐可视化界面
 
 作者: Assistant
 日期: 2024
 """
 
-from .music_engine import MusicEngine
-from .music_mapper import MusicMapper
 from .audio_config import AudioConfig
+from .mbux_controller import MBUXSoundDriveController, MusicalExpressionEngine
+from .music_engine import AudioEngine, MockAudioEngine, MusicEngine
+from .music_mapper import MusicParameters
 
 __all__ = [
-    'MusicEngine',
-    'MusicMapper', 
-    'AudioConfig'
+    "MusicEngine",
+    "AudioEngine",
+    "MockAudioEngine",
+    "AudioConfig",
+    "MusicParameters",
+    "MBUXSoundDriveController",
+    "MusicalExpressionEngine",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

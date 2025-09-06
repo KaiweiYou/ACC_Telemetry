@@ -34,6 +34,22 @@ pip install -r requirements.txt
 pip install .
 ```
 
+### 开发环境安装
+
+如果您想参与开发，可以安装开发环境：
+
+```bash
+pip install -r dev-requirements.txt
+```
+
+或者使用pip的extras功能：
+
+```bash
+pip install -e ".[dev]"
+```
+
+这将安装所有开发工具，包括测试、代码质量检查和文档生成工具。
+
 ## 使用方法
 
 ### 通过主程序使用
@@ -198,5 +214,36 @@ python -m acc_telemetry.utils.osc_sender
 本项目采用MIT许可证，详情请参阅LICENSE文件。
 
 ## 贡献指南
+
+我们欢迎各种形式的贡献，包括但不限于：
+
+- 报告问题和提出建议
+- 提交代码改进
+- 改进文档
+- 添加新功能
+
+### 开发流程
+
+1. Fork本仓库
+2. 创建您的特性分支 (`git checkout -b feature/amazing-feature`)
+3. 安装开发环境 (`pip install -r dev-requirements.txt`)
+4. 提交您的更改 (`git commit -m 'Add some amazing feature'`)
+5. 推送到分支 (`git push origin feature/amazing-feature`)
+6. 创建Pull Request
+
+### 代码规范
+
+本项目使用以下工具确保代码质量：
+
+- flake8：代码风格检查
+- black：代码格式化
+- isort：导入语句排序
+- mypy：类型检查
+
+提交代码前，请运行以下命令确保代码符合规范：
+
+```bash
+python -m scripts.quality_check
+```
 
 欢迎提交问题报告和功能建议。如果您想贡献代码，请先创建issue讨论您的想法。

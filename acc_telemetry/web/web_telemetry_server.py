@@ -13,11 +13,13 @@ ACC 遥测 Web 面板服务器
 4. 在手机或其他设备上访问 http://[您的IP地址]:8080
 """
 
-import sys
+import argparse
 import os
 import socket
-import argparse
+import sys
+
 from .web_server import WebTelemetryServer
+
 
 def get_local_ip():
     """获取本机局域网IP地址"""
@@ -31,19 +33,24 @@ def get_local_ip():
     except Exception:
         return "127.0.0.1"
 
+
 def main():
-    parser = argparse.ArgumentParser(description='ACC 遥测 Web 面板服务器')
-    parser.add_argument('--host', default='0.0.0.0', help='服务器绑定地址 (默认: 0.0.0.0)')
-    parser.add_argument('--port', type=int, default=8080, help='服务器端口 (默认: 8080)')
-    
+    parser = argparse.ArgumentParser(description="ACC 遥测 Web 面板服务器")
+    parser.add_argument(
+        "--host", default="0.0.0.0", help="服务器绑定地址 (默认: 0.0.0.0)"
+    )
+    parser.add_argument(
+        "--port", type=int, default=8080, help="服务器端口 (默认: 8080)"
+    )
+
     args = parser.parse_args()
-    
+
     # 获取本机IP地址
     local_ip = get_local_ip()
-    
-    print("="*60)
+
+    print("=" * 60)
     print("🏎️  ACC 遥测 Web 面板服务器")
-    print("="*60)
+    print("=" * 60)
     print(f"服务器启动地址: http://{args.host}:{args.port}")
     print(f"本机访问地址:   http://localhost:{args.port}")
     print(f"局域网访问地址: http://{local_ip}:{args.port}")
@@ -56,12 +63,12 @@ def main():
     print("   - 确保ACC游戏正在运行")
     print("   - 确保防火墙允许端口访问")
     print("   - 按 Ctrl+C 停止服务器")
-    print("="*60)
+    print("=" * 60)
     print("")
-    
+
     # 创建并启动服务器
     server = WebTelemetryServer(host=args.host, port=args.port)
-    
+
     try:
         server.start()
     except KeyboardInterrupt:
@@ -76,5 +83,6 @@ def main():
         print("3. 检查防火墙设置")
         sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
